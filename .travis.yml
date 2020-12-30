@@ -9,4 +9,13 @@ before_install:
 scripts:
     - docker run -e CI=true $DOCKER_ID/client-test npm run test
     - docker run -e CI=true $DOCKER_ID/api-test npm run test
+
+after_success:
+    - docker build -t $DOCKER_ID/client ./client
+    - docker build -t $DOCKER_ID/api    ./api
+    - docker build -t $DOCKER_ID/nginx  ./nginx
+    - echo $DOCKER_PW | docker login -u $DOCKER_ID --password-stdin
+    - docker push $DOCKER_ID/client
+    - docker push $DOCKER_ID/api
+    - docker push $DOCKER_ID/nginx
     
