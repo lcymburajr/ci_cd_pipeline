@@ -7,8 +7,8 @@ before_install:
     - docker build -t $DOCKER_ID/api-test -f ./api/Dockerfile.dev ./api
 
     # Install eksctl
-    -  curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp \
-       sudo mv /tmp/eksctl /usr/local/bin
+    - curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+    - sudo mv /tmp/eksctl /usr/local/bin
 
 scripts:
     - docker run -e CI=true $DOCKER_ID/client-test npm run test
