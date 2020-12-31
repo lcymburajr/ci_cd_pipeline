@@ -22,6 +22,3 @@ after_success:
     - docker push $DOCKER_ID/client
     - docker push $DOCKER_ID/api
     - docker push $DOCKER_ID/nginx
-
-
-    
