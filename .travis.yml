@@ -16,7 +16,7 @@ install:
     # - docker build -t $DOCKER_ID/api-test -f ./api/Dockerfile.dev ./api
 
 scripts:
-    - kubectl
+    - kubectl get pods
     # - docker run -e CI=true $DOCKER_ID/client-test npm run test
     # - docker run -e CI=true $DOCKER_ID/api-test npm run test
 
