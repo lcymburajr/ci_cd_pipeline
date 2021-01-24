@@ -1,10 +1,9 @@
-sudo: required
 services:
     - docker
-env:
-    global:
-        - SHA=$(git rev-parse HEAD)
-        - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+# env:
+#     global:
+#         - SHA=$(git rev-parse HEAD)
+#         - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
 install:
     - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
@@ -12,18 +11,18 @@ install:
     - sudo mv ./kubectl /usr/local/bin/kubectl
     - mkdir ${HOME}/.kube
     - echo "$KUBE_CONFIG" | base64 --decode > ${HOME}/.kube/config
-    - docker build -t $DOCKER_ID/client-test -f ./client/Dockerfile.dev ./client
-    - docker build -t $DOCKER_ID/api-test -f ./api/Dockerfile.dev ./api
+    # - docker build -t $DOCKER_ID/client-test -f ./client/Dockerfile.dev ./client
+    # - docker build -t $DOCKER_ID/api-test -f ./api/Dockerfile.dev ./api
 
 scripts:
     - kubectl get pods
-    - docker run -e CI=true $DOCKER_ID/client-test npm run test
-    - docker run -e CI=true $DOCKER_ID/api-test npm run test
+    # - docker run -e CI=true $DOCKER_ID/client-test npm run test
+    # - docker run -e CI=true $DOCKER_ID/api-test npm run test
 
-deploy:
-    provider: script
-    script: bash ./deploy.sh
-    on:
-        branch: master
+# deploy:
+#     provider: script
+#     script: bash ./deploy.sh
+#     on:
+#         branch: master
 
 
