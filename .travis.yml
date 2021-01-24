@@ -7,11 +7,17 @@ services:
 #         - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
 install:
-    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-    - chmod +x ./kubectl
-    - sudo mv ./kubectl /usr/local/bin/kubectl
+    - echo "$DOCKER_PW" | docker login -u "DOCKER_ID" –password-stdin
     - mkdir ${HOME}/.kube
-    - echo "$KUBE_CONFIG" | base64 --decode > ${HOME}/.kube/config
+    - cp ./k8s/config.yaml ${HOME}/.kube/config
+    - cd ${HOME}/.kube
+    - sed -i 's/KUBE_CLUSTER_NAME/'"$KUBE_CLUSTER_NAME"'/g' config
+    - sed -i 's/KUBE_CLUSTER_CERTIFICATE/'"$KUBE_CLUSTER_CERTIFICATE"'/g' config
+    - sed -i 's/KUBE_CLIENT_CERTIFICATE/'"$KUBE_CLIENT_CERTIFICATE"'/g' config
+    - sed -i 's/KUBE_CLIENT_KEY/'"$KUBE_CLIENT_KEY"'/g' config
+    - sed -i 's/KUBE_ADMIN_PWD/'"$KUBE_ADMIN_PWD"'/g' config
+    - kubectl config use-context $KUBE_CLUSTER_NAME
+    - cd $TRAVIS_BUILD_DIR
     # - docker build -t $DOCKER_ID/client-test -f ./client/Dockerfile.dev ./client
     # - docker build -t $DOCKER_ID/api-test -f ./api/Dockerfile.dev ./api
 
