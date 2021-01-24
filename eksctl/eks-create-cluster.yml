@@ -1,0 +1,56 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: my-eks
+  region: us-east-1
+nodeGroups:
+  - name: scale-east-1a
+    instanceType: t2.small
+    desiredCapacity: 1
+    maxSize: 3
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+    availabilityZones: ["us-east-1a"]
+    labels:
+      nodegroup-type: stateful-east-1a
+      instance-type: onDemand
+    ssh:
+      publicKeyName: eks
+  - name: scale-east-1b
+    instanceType: t2.small
+    desiredCapacity: 1
+    maxSize: 3
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+    availabilityZones: ["us-east-1b"]
+    labels:
+      nodegroup-type: stateful-east-1b
+      instance-type: onDemand
+    ssh:
+      publicKeyName: eks
+  - name: scale-spot-east-1c
+    desiredCapacity: 1
+    maxSize: 3
+    instancesDistribution:
+      instanceTypes: ["t2.small", "t3.small"]
+      onDemandBaseCapacity: 0
+      onDemandPercentageAboveBaseCapacity: 0
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+    availabilityZones: ["us-east-1c"]
+    labels:
+      nodegroup-type: stateless-workload
+      instance-type: spot
+    ssh: 
+      publicKeyName: eks
+
+# cloudWatch list types or put * for all
+# cloudWatch:
+#   clusterLogging:
+#     enableTypes: ["api", "audit", "authenticator"]
+  
+availabilityZones: ["us-east-1a", "us-east-1b", "us-east-1c"]
+    
