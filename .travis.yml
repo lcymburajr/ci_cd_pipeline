@@ -1,24 +1,29 @@
 sudo: required
 services:
     - docker
+env:
+    global:
+        - SHA=$(git rev-parse HEAD)
+        - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
-before_install:
+install:
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl
+    - sudo mv ./kubectl /usr/local/bin/kubectl
+    - mkdir ${HOME}/.kube
+    - echo "$KUBE_CONFIG" | base64 --decode > ${HOME}/.kube/config
     - docker build -t $DOCKER_ID/client-test -f ./client/Dockerfile.dev ./client
     - docker build -t $DOCKER_ID/api-test -f ./api/Dockerfile.dev ./api
 
-    # Install eksctl
-    - curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-    - sudo mv /tmp/eksctl /usr/local/bin
-
 scripts:
+    - kubectl get pods
     - docker run -e CI=true $DOCKER_ID/client-test npm run test
     - docker run -e CI=true $DOCKER_ID/api-test npm run test
 
-after_success:
-    - docker build -t $DOCKER_ID/client ./client
-    - docker build -t $DOCKER_ID/api    ./api
-    - docker build -t $DOCKER_ID/nginx  ./nginx
-    - echo $DOCKER_PW | docker login -u $DOCKER_ID --password-stdin
-    - docker push $DOCKER_ID/client
-    - docker push $DOCKER_ID/api
-    - docker push $DOCKER_ID/nginx
+deploy:
+    provider: script
+    script: bash ./deploy.sh
+    on:
+        branch: master
+
+

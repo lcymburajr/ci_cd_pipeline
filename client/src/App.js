@@ -28,6 +28,7 @@ const App = () => {
           {hello}
         </p>
         <p>This is cool!</p>
+        <p>Yup</p>
       </header>
     </div>
   );
