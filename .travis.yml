@@ -7,7 +7,7 @@ services:
 #         - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
 install:
-    - echo "$DOCKER_PW" | docker login -u "DOCKER_ID" –password-stdin
+    - echo $DOCKER_PW | docker login -u $DOCKER_ID --password-stdin
     - mkdir ${HOME}/.kube
     - cp ./k8s/config.yaml ${HOME}/.kube/config
     - cd ${HOME}/.kube
