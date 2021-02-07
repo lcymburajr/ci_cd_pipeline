@@ -113,7 +113,7 @@ while true; do wget -q -O- http://php-apache.default.svc.cluster.local; done
 
 ### auto-scaler
 `helm repo add autoscaler https://kubernetes.github.io/autoscaler`
-`helm install my-release autoscaler/cluster-autoscaler --set autoDiscovery.clusterName=<CLUSTER NAME>`
+`helm install autoscaler autoscaler/cluster-autoscaler --set autoDiscovery.clusterName=<CLUSTER NAME>`
 
 
 # Providing RBAC to IAM users
@@ -137,8 +137,8 @@ fetch current configmap before adding our user mapping - prints everything on to
 edit the yaml file and add a "mapUsers" section
 ```bash
   mapUsers: |
-    - userarn: arn:aws:iam::xxxxxxxxx:user/k8s-cluster-admin
-      username: k8s-cluster-admin
+    - userarn: arn:aws:iam::xxxxxxxxx:user/k8-cluster-admin
+      username: k8-cluster-admin
       groups:
         - system:masters
 ```
@@ -147,7 +147,7 @@ list of K8's default role
 https://kubernetes.io/docs/reference/access-authn-authz/rbac/#default-roles-and-role-bindings
 
 Apply changes
-`kubectl apply -f aws-auth-configmap.yaml -n kube-system`
+`kubectl apply -f aws-auth-configmap.yaml`
 
 add user to ~/.aws/credentials by creating a new section
 
@@ -164,3 +164,136 @@ get current aws user
 
 to change aws profile
 `export AWS_PROFILE="k8-cluster-admin"`
+
+Check it works
+`kubectl get nodes`
+## add read-only user for particular namespace
+
+```bash
+kubectl create namespace production
+```
+
+create IAM user and grab access-key
+
+create role
+
+```bash
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  namespace: production
+  name: prod-viewer-role
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["*"]  # can be further limited, e.g. ["deployments", "replicasets", "pods"]
+  verbs: ["get", "list", "watch"] 
+```
+
+create rolebinding
+
+```bash
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: prod-viewer-binding
+  namespace: production
+subjects:
+- kind: User
+  name: prod-viewer
+  apiGroup: ""
+roleRef:
+  kind: Role
+  name: prod-viewer-role
+  apiGroup: ""
+```
+
+create role and binding
+
+```bash
+kubectl apply -f role.yaml rolebinding.yaml
+```
+
+add user to aws-auth configmap
+
+add user to ~/.aws/credentials file
+
+```bash
+[clusteradmin]
+aws_access_key_id=
+aws_secret_access_key=
+region=us-east-1
+output=json
+[productionviewer]
+aws_access_key_id=
+aws_secret_access_key=
+region=us-east-1
+output=json
+```
+
+set this user as the active one
+
+```bash
+aws sts get-caller-identity
+export AWS_PROFILE="productionviewer"
+aws sts get-caller-identity
+```
+
+test
+`kubectl -n production get pods`
+
+# Dashboard
+### Deploy the K8s Metrics Server
+`kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml`
+
+test its installed 
+`get deployment metrics-server -n kube-system`
+
+Download Dashboard with same version on K8s you are using
+`kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.3/aio/deploy/recommended.yaml`
+
+next make a services accout  
+```
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eks-course-admin
+  namespace: kube-system
+
+---
+  
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: eks-course-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: eks-course-admin
+  namespace: kube-system
+  ```
+
+### create an admin user account
+```
+kubectl apply -f admin-service-account.yml
+```
+### access the dashboard
+* get a security token
+```kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep eks-course-admin | awk '{print $1}')
+```
+record the output of ```token:```
+
+* start kube proxy via ```kubectl proxy```
+
+* open browser at `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#!/login`
+
+and choose _token_ as login method, where you have to provide the token you recorded two steps before
+
+Get cluster IPs
+`kubectl get pods -o wide`
+
+get info
+
+`kubectl describe service frontend`

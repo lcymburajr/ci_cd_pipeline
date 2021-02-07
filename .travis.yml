@@ -1,31 +1,45 @@
 sudo: required
+
+# branches:
+#   only:
+#     - master
+
 services:
     - docker
-# env:
-#     global:
-#         - SHA=$(git rev-parse HEAD)
-#         - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
-install:
-    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-    - chmod +x ./kubectl
-    - sudo mv ./kubectl /usr/local/bin/kubectl
-    - mkdir ${HOME}/.kube
-    # - echo "$KUBE_CONFIG" | base64 --decode > ${HOME}/.kube/config
-    - sed -i 's/KUBE_CLUSTER_NAME/'"$KUBE_CLUSTER_NAME"'/g' config
-    - sed -i 's/KUBE_CLUSTER_CERTIFICATE/'"$KUBE_CLUSTER_CERTIFICATE"'/g' config
-    - sed -i 's/KUBE_CLIENT_CERTIFICATE/'"$KUBE_CLIENT_CERTIFICATE"'/g' config
-    - sed -i 's/KUBE_CLIENT_KEY/'"$KUBE_CLIENT_KEY"'/g' config
-    - sed -i 's/KUBE_ADMIN_PWD/'"$KUBE_ADMIN_PWD"'/g' config
-    - kubectl config use-context $KUBE_CLUSTER_NAME
-    - cd $TRAVIS_BUILD_DIR
+before_install:
+    # Download kubectl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+    - chmod +x kubectl && sudo mv kubectl /usr/local/bin/kubectl
+    # Login to Docker
+    - echo $DOCKER_PW | docker login -u $DOCKER_ID --password-stdin
+    # Build containers
+    - docker build -t $DOCKER_ID/client:$TRAVIS_BUILD_NUMBER ./client
+    - docker build -t $DOCKER_ID/api:$TRAVIS_BUILD_NUMBER ./api
+    # Push containers to docker hub
+    - docker push $DOCKER_ID/client
+    - docker push $DOCKER_ID/api
+
     # - docker build -t $DOCKER_ID/client-test -f ./client/Dockerfile.dev ./client
     # - docker build -t $DOCKER_ID/api-test -f ./api/Dockerfile.dev ./api
 
-scripts:
-    - kubectl get pods
+script:
+    - bash scripts/updateKube.sh
+
+deploy:
+    provider: script
+    script: bash scripts/deploy.sh
+    on:
+        branch: master
+
+# scripts:
+#     - kubectl get pods
     # - docker run -e CI=true $DOCKER_ID/client-test npm run test
     # - docker run -e CI=true $DOCKER_ID/api-test npm run test
+
+
+
+
 
 # deploy:
 #     provider: script
