@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "$KUBERNETES_CLUSTER_CERTIFICATE" | base64 --decode > cert.crt
+
 /usr/local/bin/kubectl \
   --kubeconfig=/dev/null \
   --server=$KUBERNETES_SERVER \
@@ -9,6 +10,7 @@ echo "$KUBERNETES_CLUSTER_CERTIFICATE" | base64 --decode > cert.crt
   apply -f ./k8s
 
 echo "The build number is ${TRAVIS_BUILD_NUMBER}"
+
 /usr/local/bin/kubectl \
   --kubeconfig=/dev/null \
   --server=$KUBERNETES_SERVER \
