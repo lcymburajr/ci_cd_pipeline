@@ -2,11 +2,11 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: cicd
-  namespace: kube-system
+  namespace: default
 subjects:
   - kind: ServiceAccount
     name: cicd
-    namespace: kube-system
+    namespace: default
 roleRef:
   kind: Role
   name: cicd

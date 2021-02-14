@@ -2,7 +2,7 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: cicd
-  namespace: kube-system
+  namespace: default
 rules:
   - apiGroups: ["", "apps", "batch", "extensions"]
     resources: ["deployments", "services", "replicasets", "pods", "jobs", "cronjobs"]

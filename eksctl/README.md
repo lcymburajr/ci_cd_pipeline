@@ -281,7 +281,9 @@ kubectl apply -f admin-service-account.yml
 ```
 ### access the dashboard
 * get a security token
-```kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep eks-course-admin | awk '{print $1}')
+```
+kubectl describe secret $(kubectl -n default get secret | grep cicd | awk '{print $1}')
+kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep eks-course-admin | awk '{print $1}')
 ```
 record the output of ```token:```
 
