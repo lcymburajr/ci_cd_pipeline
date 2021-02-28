@@ -3,16 +3,13 @@ version: 2.1
 # Define the jobs we want to run for this project
 jobs:
   build:
-    docker:
-        auth:
-          username: $DOCKER_USER
-          password: $DOCKER_PASS
+    machine: true
     steps:
-      - setup_remote_docker:
-          version: 19.03.13
       - checkout
+      - run: echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
       - run: docker build -t $DOCKER_USER/client-test -f ./client/Dockerfile.dev ./client
   test:
+    machine: true
     steps:
       - checkout
       - run: docker run -e CI=true $DOCKER_USER/client-test npm run test
