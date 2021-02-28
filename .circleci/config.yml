@@ -30,4 +30,6 @@ workflows:
   deployment:
     jobs:
       - test
-      - deploy
+      - deploy:
+          requires:
+            - test
