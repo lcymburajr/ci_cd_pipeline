@@ -5,13 +5,23 @@ orbs:
   kubernetes: circleci/kubernetes@0.4.0
 
 jobs:
-  create-deployment:
+  test:
+    machine: true
+    steps:
+      - checkout
+      - run: echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
+      - run: docker build -t $DOCKER_USER/client-test -f ./client/Dockerfile.dev ./client
+      - run: docker build -t $DOCKER_USER/api-test -f ./api/Dockerfile.dev ./api
+      - run: docker run -e CI=true $DOCKER_USER/client-test npm run test
+      - run: docker run -e CI=true $DOCKER_USER/api-test npm run test
+  
+  deploy:
     executor: aws-eks/python3
     steps:
       - checkout
       - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
           aws-region: us-east-1
-          cluster-name: my-eks
           install-kubectl: true
       - kubernetes/create-or-update-resource:
           resource-file-path: ./k8s
@@ -19,4 +29,5 @@ jobs:
 workflows:
   deployment:
     jobs:
-      - create-deployment
+      - test
+      - deploy
