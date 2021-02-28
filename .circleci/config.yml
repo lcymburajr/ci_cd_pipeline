@@ -1,12 +1,12 @@
-version: 2.1
-
 jobs:
-
   build:
-    docker:
-      steps:
-        - checkout
-        - run:
-            name: Test Client
-            command: |
-              docker build -t lcymburajr/client-test -f ./client/Dockerfile.dev ./client
+    steps:
+      - checkout
+
+      - run: docker build -t lcymburajr/client-test -f ./client/Dockerfile.dev ./client
+      
+      - run: docker run lcymburajr/client-test npm run test
+
+      - setup_remote_docker:
+        version: 19.03.13
+           
