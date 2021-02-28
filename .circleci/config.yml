@@ -1,5 +1,5 @@
 jobs:
- build:
+ test:
    machine: true
    steps:
      - checkout
@@ -8,5 +8,5 @@ jobs:
      # build the test image
      - run: docker build -t $DOCKER_USER/client-test -f ./client/Dockerfile.dev ./client
      # test the image
-     - run: docker run $DOCKER_USER/client-test npm run test
+     - run: docker run -e CI=true $DOCKER_USER/client-test npm run test
            
