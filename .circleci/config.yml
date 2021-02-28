@@ -1,70 +1,23 @@
 version: 2.1
 
 orbs:
-  aws-eks: circleci/aws-eks@0.2.0
-  kubernetes: circleci/kubernetes@0.3.0
+  aws-eks: circleci/aws-eks@x.y
+  kubernetes: circleci/kubernetes@0.4.0
 
 jobs:
-  deploy-application:
-    executor: aws-eks/python3
-    steps:
-      - checkout          
-      - aws-eks/update-kubeconfig-with-authenticator:
-          cluster-name: << parameters.cluster-name >>
-          install-kubectl: true
-          aws-region: << parameters.aws-region >>
-      - kubernetes/create-or-update-resource:
-          resource-name: /k8s
-  test-application:
+  create-deployment:
     executor: aws-eks/python3
     parameters:
       cluster-name:
         description: |
           Name of the EKS cluster
         type: string
-      aws-region:
-        description: |
-          AWS region
-        type: string
-        default: ""
-      expected-version-info:
-        description: |
-          Expected app version (this is used for testing that the
-          correct version has been deployed)
-        type: string
     steps:
+      - checkout
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
           install-kubectl: true
-          aws-region: << parameters.aws-region >>
-      - run:
-          name: Wait for service to be ready
-          command: |
-            kubectl get pods
-            kubectl get services
-            sleep 30
-            for attempt in {1..20}; do
-              EXTERNAL_IP=$(kubectl get service demoapp | awk '{print $4}' | tail -n1)
-              echo "Checking external IP: ${EXTERNAL_IP}"
-              if [ -n "${EXTERNAL_IP}" ] && [ -z $(echo "${EXTERNAL_IP}" | grep "pending") ]; then
-                break
-              fi
-              echo "Waiting for external IP to be ready: ${EXTERNAL_IP}"
-              sleep 10
-            done
-            sleep 180
-            curl -s --retry 10 "http://$EXTERNAL_IP" | grep "<< parameters.expected-version-info >>"
-workflows:
-  deployment:
-    jobs:
-      - deploy-application:
-          cluster-name: my-eks
-          aws-region: $AWS_DEFAULT_REGION
-          version-info: "${CIRCLE_SHA1}"
-      - test-application:
-          name: test-application
-          cluster-name: my-eks
-          aws-region: $AWS_DEFAULT_REGION
-          expected-version-info: "${CIRCLE_SHA1}"
-          requires:
-            - deploy-application
+      - kubernetes/create-or-update-resource:
+          resource-file-path: "/k8s"
+          get-rollout-status: true
+          show-kubectl-command: true
