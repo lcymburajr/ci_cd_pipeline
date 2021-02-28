@@ -14,9 +14,7 @@ jobs:
           cluster-name: my-eks
           install-kubectl: true
       - kubernetes/create-or-update-resource:
-          resource-file-path: /k8s
-          get-rollout-status: true
-          show-kubectl-command: true
+          resource-file-path: ./k8s
 
 workflows:
   deployment:
