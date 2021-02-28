@@ -5,24 +5,21 @@ orbs:
   kubernetes: circleci/kubernetes@0.4.0
 
 jobs:
-  create-deployment:
+  deploy:
     executor: aws-eks/python3
-    parameters:
-      cluster-name:
-        description: |
-          my-eks
-        type: string
     steps:
       - checkout
       - aws-eks/update-kubeconfig-with-authenticator:
+          aws-profile: terraform
+          aws-region: us-east-1
+          cluster-name: my-eks
           install-kubectl: true
       - kubernetes/create-or-update-resource:
-          resource-file-path: "/k8s"
+          resource-file-path: /k8s
           get-rollout-status: true
           show-kubectl-command: true
 
 workflows:
   deployment:
     jobs:
-      - create-deployment:
-          cluster-name: my-eks
+      - deploy:
