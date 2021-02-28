@@ -10,7 +10,6 @@ jobs:
     steps:
       - checkout
       - aws-eks/update-kubeconfig-with-authenticator:
-          aws-profile: terraform
           aws-region: us-east-1
           cluster-name: my-eks
           install-kubectl: true
