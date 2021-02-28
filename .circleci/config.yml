@@ -1,12 +1,12 @@
 jobs:
-  build:
-    steps:
-      - checkout
-
-      - run: docker build -t lcymburajr/client-test -f ./client/Dockerfile.dev ./client
-      
-      - run: docker run lcymburajr/client-test npm run test
-
-      - setup_remote_docker:
-        version: 19.03.13
+ build:
+   machine: true
+   steps:
+     - checkout
+     # login to docker
+     - run: echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
+     # build the test image
+     - run: docker build -t $DOCKER_USER/client-test -f ./client/Dockerfile.dev ./client
+     # test the image
+     - run: docker run $DOCKER_USER/client-test npm run test
            
