@@ -3,9 +3,10 @@ version: 2.1
 jobs:
 
   build:
-    steps:
-      - checkout
-      - run:
-          name: Test Client
-          command: |
-            docker build -t lcymburajr/client-test -f ./client/Dockerfile.dev ./client
+    docker:
+      steps:
+        - checkout
+        - run:
+            name: Test Client
+            command: |
+              docker build -t lcymburajr/client-test -f ./client/Dockerfile.dev ./client
