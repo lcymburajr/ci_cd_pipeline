@@ -8,12 +8,15 @@ jobs:
           username: $DOCKER_USER
           password: $DOCKER_PASS
     steps:
+      - setup_remote_docker:
+          version: 19.03.13
       - checkout
       - run: docker build -t $DOCKER_USER/client-test -f ./client/Dockerfile.dev ./client
   test:
     steps:
       - checkout
       - run: docker run -e CI=true $DOCKER_USER/client-test npm run test
+  
 
 # Orchestrate our job run sequence
 workflows:
