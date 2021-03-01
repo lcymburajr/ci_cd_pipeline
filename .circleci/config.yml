@@ -35,12 +35,16 @@ jobs:
           cluster-name: $CLUSTER_NAME
           aws-region: $AWS_DEFAULT_REGION
           install-kubectl: true
-      - kubernetes/create-or-update-resource:
-          resource-file-path: ./k8s/api-deployment.yml
+      - kubernetes/update-container-image:
+          container-image-updates: '$DOCKER_USER/api=$DOCKER_USER/api:$CIRCLE_BUILD_NUM'
+          get-rollout-status: true
+          record: true
           resource-name: deployment/api-deployment
           show-kubectl-command: true
-      - kubernetes/create-or-update-resource:
-          resource-file-path: ./k8s/client-deployment.yml
+      - kubernetes/update-container-image:
+          container-image-updates: '$DOCKER_USER/client=$DOCKER_USER/client:$CIRCLE_BUILD_NUM'
+          get-rollout-status: true
+          record: true
           resource-name: deployment/client-deployment
           show-kubectl-command: true
 

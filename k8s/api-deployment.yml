@@ -14,7 +14,7 @@ spec:
         spec:
             containers:
                 - name: api
-                  image: lcymburajr/api:$CIRCLE_BUILD_NUM
+                  image: lcymburajr/api
                   ports:
                       - containerPort: 5000
                   
