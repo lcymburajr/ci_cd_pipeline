@@ -56,17 +56,17 @@ workflows:
       - deploy:
           requires:
             - build
-      - aws-eks/update-container-image:
-          cluster-name: $CLUSTER_NAME
-          resource-name: deployment/api-deployment
-          container-image-updates: 'api=$DOCKER_USER/api:$CIRCLE_BUILD_NUM'
-          record: true
-          requires:
-            - deploy
-      - aws-eks/update-container-image:
-          cluster-name: $CLUSTER_NAME
-          resource-name: deployment/client-deployment
-          container-image-updates: 'client=$DOCKER_USER/client:$CIRCLE_BUILD_NUM'
-          record: true
-          requires:
-            - deploy
+      # - aws-eks/update-container-image:
+      #     cluster-name: $CLUSTER_NAME
+      #     resource-name: deployment/api-deployment
+      #     container-image-updates: 'api=$DOCKER_USER/api:$CIRCLE_BUILD_NUM'
+      #     record: true
+      #     requires:
+      #       - deploy
+      # - aws-eks/update-container-image:
+      #     cluster-name: $CLUSTER_NAME
+      #     resource-name: deployment/client-deployment
+      #     container-image-updates: 'client=$DOCKER_USER/client:$CIRCLE_BUILD_NUM'
+      #     record: true
+      #     requires:
+      #       - deploy
