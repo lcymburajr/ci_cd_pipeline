@@ -37,16 +37,14 @@ jobs:
           install-kubectl: true
       - kubernetes/update-container-image:
           container-image-updates: 'api=$DOCKER_USER/api:$CIRCLE_BUILD_NUM'
-          get-rollout-status: true
-          record: true
-          resource-name: deployment/api-deployment
+          resource-file-path: 'k8s/api-deployment.yml'
           show-kubectl-command: true
+          get-rollout-status: true
       - kubernetes/update-container-image:
           container-image-updates: 'client=$DOCKER_USER/client:$CIRCLE_BUILD_NUM'
-          get-rollout-status: true
-          record: true
-          resource-name: deployment/client-deployment
+          resource-file-path: 'k8s/client-deployment.yml'
           show-kubectl-command: true
+          get-rollout-status: true
 
 workflows:
   deployment:
