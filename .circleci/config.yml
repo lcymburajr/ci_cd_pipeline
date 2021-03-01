@@ -23,17 +23,22 @@ jobs:
       - run: docker build -t $DOCKER_USER/api:$CIRCLE_BUILD_NUM ./api
       - run: docker push $DOCKER_USER/client:$CIRCLE_BUILD_NUM
       - run: docker push $DOCKER_USER/api:$CIRCLE_BUILD_NUM
-  
-  # deploy:
-  #   executor: aws-eks/python3
-  #   steps:
-  #     - checkout
-  #     - aws-eks/update-kubeconfig-with-authenticator:
-  #         cluster-name: my-eks
-  #         aws-region: us-east-1
-  #         install-kubectl: true
-  #     - kubernetes/create-or-update-resource:
-  #         resource-file-path: ./k8s
+  deploy:
+    executor: aws-eks/python3
+    steps:
+      - checkout
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: $CLUSTER_NAME
+          aws-region: $AWS_DEFAULT_REGION
+          install-kubectl: true
+      - kubernetes/create-or-update-resource:
+          resource-file-path: ./k8s/api-deployment.yml
+          resource-name: deployment/api-deployment
+          show-kubectl-command: true
+      - kubernetes/create-or-update-resource:
+          resource-file-path: ./k8s/client-deployment.yml
+          resource-name: deployment/client-deployment
+          show-kubectl-command: true
 
 workflows:
   deployment:
@@ -42,6 +47,6 @@ workflows:
       - build:
           requires:
             - test
-      # - deploy:
-      #     requires:
-      #       - test
+      - deploy:
+          requires:
+            - build
