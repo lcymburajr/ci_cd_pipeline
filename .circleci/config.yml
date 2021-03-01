@@ -39,12 +39,10 @@ jobs:
           container-image-updates: 'api=$DOCKER_USER/api:$CIRCLE_BUILD_NUM'
           resource-name: deployment/api-deployment
           show-kubectl-command: true
-          get-rollout-status: true
       - kubernetes/update-container-image:
           container-image-updates: 'client=$DOCKER_USER/client:$CIRCLE_BUILD_NUM'
           resource-name: deployment/client-deployment
           show-kubectl-command: true
-          get-rollout-status: true
 
 workflows:
   deployment:
