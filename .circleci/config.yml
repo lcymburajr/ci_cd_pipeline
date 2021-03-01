@@ -35,16 +35,16 @@ jobs:
           cluster-name: $CLUSTER_NAME
           aws-region: $AWS_DEFAULT_REGION
           install-kubectl: true
-      - aws-eks/update-container-image:
-          cluster-name: $CLUSTER_NAME
-          resource-name: deployment/api-deployment
-          container-image-updates: 'api=$DOCKER_USER/api:$CIRCLE_BUILD_NUM'
-          record: true
-      - aws-eks/update-container-image:
-          cluster-name: $CLUSTER_NAME
-          resource-name: deployment/client-deployment
-          container-image-updates: 'client=$DOCKER_USER/client:$CIRCLE_BUILD_NUM'
-          record: true
+      - kubernetes/create-or-update-resource:
+          resource-file-path: "k8s/api-deployment.yml"
+          resource-name: "deployment/api-deployment"
+          get-rollout-status: true
+          show-kubectl-command: true
+      - kubernetes/create-or-update-resource:
+          resource-file-path: "k8s/client-deployment.yml"
+          resource-name: "deployment/client-deployment"
+          get-rollout-status: true
+          show-kubectl-command: true
 
 workflows:
   deployment:
@@ -56,3 +56,17 @@ workflows:
       - deploy:
           requires:
             - build
+      - aws-eks/update-container-image:
+          cluster-name: $CLUSTER_NAME
+          resource-name: deployment/api-deployment
+          container-image-updates: 'api=$DOCKER_USER/api:$CIRCLE_BUILD_NUM'
+          record: true
+          requires:
+            - deploy
+      - aws-eks/update-container-image:
+          cluster-name: $CLUSTER_NAME
+          resource-name: deployment/client-deployment
+          container-image-updates: 'client=$DOCKER_USER/client:$CIRCLE_BUILD_NUM'
+          record: true
+          requires:
+            - deploy
