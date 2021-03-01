@@ -14,22 +14,34 @@ jobs:
       - run: docker build -t $DOCKER_USER/api-test -f ./api/Dockerfile.dev ./api
       - run: docker run -e CI=true $DOCKER_USER/client-test npm run test
       - run: docker run -e CI=true $DOCKER_USER/api-test npm run test
-  
-  deploy:
-    executor: aws-eks/python3
+  build:
+    machine: true
     steps:
       - checkout
-      - aws-eks/update-kubeconfig-with-authenticator:
-          cluster-name: my-eks
-          aws-region: us-east-1
-          install-kubectl: true
-      - kubernetes/create-or-update-resource:
-          resource-file-path: ./k8s
+      - run: echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
+      - run: docker build -t $DOCKER_USER/client:$CIRCLE_BUILD_NUM ./client
+      - run: docker build -t $DOCKER_USER/api:$CIRCLE_BUILD_NUM ./api
+      - run: docker push $DOCKER_USER/client:$CIRCLE_BUILD_NUM
+      - run: docker push $DOCKER_USER/api:$CIRCLE_BUILD_NUM
+  
+  # deploy:
+  #   executor: aws-eks/python3
+  #   steps:
+  #     - checkout
+  #     - aws-eks/update-kubeconfig-with-authenticator:
+  #         cluster-name: my-eks
+  #         aws-region: us-east-1
+  #         install-kubectl: true
+  #     - kubernetes/create-or-update-resource:
+  #         resource-file-path: ./k8s
 
 workflows:
   deployment:
     jobs:
       - test
-      - deploy:
+      - build:
           requires:
             - test
+      # - deploy:
+      #     requires:
+      #       - test
