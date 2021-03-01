@@ -21,6 +21,8 @@ jobs:
       - run: echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
       - run: docker build -t $DOCKER_USER/client:$CIRCLE_BUILD_NUM ./client
       - run: docker build -t $DOCKER_USER/api:$CIRCLE_BUILD_NUM ./api
+      - run: docker build -t $DOCKER_USER/client ./client
+      - run: docker build -t $DOCKER_USER/api ./api
       - run: docker push $DOCKER_USER/client
       - run: docker push $DOCKER_USER/api
       - run: docker push $DOCKER_USER/client:$CIRCLE_BUILD_NUM
@@ -45,10 +47,10 @@ jobs:
 workflows:
   deployment:
     jobs:
-      - test
+      # - test
       - build:
-          requires:
-            - test
-      - deploy:
-          requires:
-            - build
+          # requires:
+          #   - test
+      # - deploy:
+      #     requires:
+      #       - build
