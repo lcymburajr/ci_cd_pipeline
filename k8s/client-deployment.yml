@@ -14,6 +14,6 @@ spec:
         spec:
             containers:
                 - name: client
-                  image: lcymburajr/client:$CIRCLE_BUILD_NUM
+                  image: lcymburajr/client
                   ports:
                       - containerPort: 3000
