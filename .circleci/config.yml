@@ -20,15 +20,15 @@ jobs:
       - checkout
       - run: echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
       
-      - run: docker build -t $DOCKER_USER/client:$CIRCLE_BUILD_NUM ./client
-      - run: docker build -t $DOCKER_USER/api:$CIRCLE_BUILD_NUM ./api
-      - run: docker build -t $DOCKER_USER/client ./client
-      - run: docker build -t $DOCKER_USER/api ./api
-
-      - run: docker push $DOCKER_USER/client
-      - run: docker push $DOCKER_USER/api
-      - run: docker push $DOCKER_USER/client:$CIRCLE_BUILD_NUM
-      - run: docker push $DOCKER_USER/api:$CIRCLE_BUILD_NUM
+      - run: docker build -t $DOCKER_USER/client:latest ./client
+      - run: docker build -t $DOCKER_USER/api:latest ./api
+      - run: docker build -t $DOCKER_USER/client:<< pipeline.id >> ./client
+      - run: docker build -t $DOCKER_USER/api:<< pipeline.id >> ./api
+      
+      - run: docker push $DOCKER_USER/client:<< pipeline.id >>
+      - run: docker push $DOCKER_USER/api:<< pipeline.id >>
+      - run: docker push $DOCKER_USER/client:latest
+      - run: docker push $DOCKER_USER/api:latest
   deploy:
     executor: aws-eks/python3
     steps:
@@ -38,7 +38,7 @@ jobs:
           aws-region: $AWS_DEFAULT_REGION
           install-kubectl: true
       - kubernetes/update-container-image:
-          container-image-updates: client=$DOCKER_USER/client:$CIRCLE_BUILD_NUM
+          container-image-updates: client=$DOCKER_USER/client:<< pipeline.id >>
           namespace: dev
           record: true
           resource-name: deployment/client-deployment
