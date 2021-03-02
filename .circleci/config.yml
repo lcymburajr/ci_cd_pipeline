@@ -39,13 +39,10 @@ jobs:
           install-kubectl: true
       - kubernetes/update-container-image:
           container-image-updates: client=$DOCKER_USER/client:$CIRCLE_BUILD_NUM
-          get-rollout-status: true
           namespace: dev
           record: true
           resource-name: deployment/client-deployment
           show-kubectl-command: true
-          watch-rollout-status: true
-          watch-timeout: 2m
       # - kubernetes/create-or-update-resource:
       #     resource-file-path: "k8s/api-deployment.yml"
       #     resource-name: "deployment/api-deployment"
