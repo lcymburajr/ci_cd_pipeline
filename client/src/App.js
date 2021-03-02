@@ -28,7 +28,6 @@ const App = () => {
           {hello}
         </p>
         <p>This is cool!</p>
-        <p>Say what!</p>
       </header>
     </div>
   );
